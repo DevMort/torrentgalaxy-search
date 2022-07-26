@@ -47,7 +47,7 @@ func get_entry(c *colly.Collector, entries *[]Entry) {
 				link:     link,
 				username: e.DOM.Find("a.username").Text(),
 				size:     e.DOM.Find("span.badge.badge-secondary.txlight").Text(),
-				seeds:    e.DOM.Find("font[color=green]").Text(),
+				seeds:    e.DOM.Find("font[color=green]").Last().Text(),
 			}
 
 			*entries = append(*entries, entry)
