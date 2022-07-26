@@ -1,1 +1,3 @@
+# torrentgalaxy-search
+
 ![](./screenshot.png)

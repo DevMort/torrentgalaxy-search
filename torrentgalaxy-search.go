@@ -10,11 +10,6 @@ import (
 	"github.com/gocolly/colly/v2"
 )
 
-type Entry struct {
-	title string
-	link  string
-}
-
 func main() {
 	if len(os.Args) != 2 {
 		panic("Only one argument is needed (the search term/s)!")
@@ -31,12 +26,7 @@ func main() {
 			if title != "comments" {
 				link, _ := entry.Attr("href")
 
-				new_entry := Entry{
-					link:  link,
-					title: title,
-				}
-
-				fmt.Printf("%s: %s\n%s\n\n", color.GreenString("TITLE"), new_entry.title, color.YellowString("https://torrentgalaxy.to"+new_entry.link))
+				fmt.Printf("%s: %s\n%s\n\n", color.GreenString("TITLE"), title, color.YellowString("https://torrentgalaxy.to"+link))
 			}
 		})
 	})
