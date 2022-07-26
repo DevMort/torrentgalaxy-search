@@ -9,6 +9,14 @@ import (
 	"github.com/gocolly/colly/v2"
 )
 
+type Entry struct {
+	title    string
+	link     string
+	username string
+	size     string
+	seeds    string
+}
+
 func main() {
 	if len(os.Args) != 2 {
 		panic("Only one argument is needed (the search term/s)!")
@@ -19,17 +27,30 @@ func main() {
 		"torrentgalaxy.to",
 	))
 
+	var entries []Entry
+	get_entry(c, &entries)
+
+	c.Visit("https://torrentgalaxy.to/torrents.php?search=" + strings.ReplaceAll(search_term, " ", "+") + "&sort=seeders&order=desc")
+
+	for i := len(entries) - 1; i >= 0; i-- {
+		fmt.Printf("%s (%s, %s, %s)\n%s\n\n", entries[i].title, entries[i].username, color.CyanString(entries[i].size), color.RedString(entries[i].seeds), color.YellowString("https://torrentgalaxy.to"+entries[i].link))
+	}
+}
+
+func get_entry(c *colly.Collector, entries *[]Entry) {
 	c.OnHTML("div.tgxtablerow.txlight", func(e *colly.HTMLElement) {
 		title, _ := e.DOM.Find("a.txlight").Attr("title")
 		if title != "comments" {
 			link, _ := e.DOM.Find("a.txlight").Attr("href")
-			username := e.DOM.Find("a.username").Text()
-			size := e.DOM.Find("span.badge.badge-secondary.txlight").Text()
-			seeds := e.DOM.Find("font[color=green]").Text()
+			entry := Entry{
+				title:    title,
+				link:     link,
+				username: e.DOM.Find("a.username").Text(),
+				size:     e.DOM.Find("span.badge.badge-secondary.txlight").Text(),
+				seeds:    e.DOM.Find("font[color=green]").Text(),
+			}
 
-			fmt.Printf("%s: %s (%s, %s, %s)\n%s\n\n", color.GreenString("TITLE"), title, username, color.CyanString(size), color.RedString(seeds), color.YellowString("https://torrentgalaxy.to"+link))
+			*entries = append(*entries, entry)
 		}
 	})
-
-	c.Visit("https://torrentgalaxy.to/torrents.php?search=" + strings.ReplaceAll(search_term, " ", "+") + "&sort=seeders&order=desc")
 }
