@@ -15,6 +15,7 @@ type Entry struct {
 	username string
 	size     string
 	seeds    string
+	magnet   string
 }
 
 func main() {
@@ -32,9 +33,17 @@ func main() {
 
 	c.Visit("https://torrentgalaxy.to/torrents.php?search=" + strings.ReplaceAll(search_term, " ", "+") + "&sort=seeders&order=desc")
 
+	j := 1
 	for i := len(entries) - 1; i >= 0; i-- {
-		fmt.Printf("%s (%s, %s, %s)\n%s\n\n", entries[i].title, entries[i].username, color.CyanString(entries[i].size), color.RedString(entries[i].seeds), color.YellowString("https://torrentgalaxy.to"+entries[i].link))
+		fmt.Printf("[%v] %s (%s, %s, %s)\n\n", color.BlueString(fmt.Sprint(j)), entries[i].title, entries[i].username, color.CyanString(entries[i].size), color.RedString(entries[i].seeds))
+		j++
 	}
+
+	fmt.Printf("\nWhich would you like to see the info of? ")
+	var choice int
+	fmt.Scanf("%2d", &choice)
+
+	fmt.Printf("\n%s\n%s\n\n", entries[len(entries)-choice].magnet, color.YellowString("https://torrentgalaxy.to"+entries[len(entries)-choice].link))
 }
 
 func get_entry(c *colly.Collector, entries *[]Entry) {
@@ -42,14 +51,15 @@ func get_entry(c *colly.Collector, entries *[]Entry) {
 		title, _ := e.DOM.Find("a.txlight").Attr("title")
 		if title != "comments" {
 			link, _ := e.DOM.Find("a.txlight").Attr("href")
+			magnet, _ := e.DOM.Find("i.glyphicon.glyphicon-magnet").Closest("a").Attr("href")
 			entry := Entry{
 				title:    title,
 				link:     link,
 				username: e.DOM.Find("a.username").Text(),
 				size:     e.DOM.Find("span.badge.badge-secondary.txlight").Text(),
 				seeds:    e.DOM.Find("font[color=green]").Last().Text(),
+				magnet:   magnet,
 			}
-
 			*entries = append(*entries, entry)
 		}
 	})
